@@ -37,8 +37,9 @@ and proactive optimization are separate tasks.
 4. Distinguish empty results, unsupported capabilities, and query failures.
    Apply Section 1's exits to the affected profiling path; use its documented
    fallbacks only when their prerequisites hold.
-5. Select output formats explicitly: JSON for discovery/metrics, DOT or table
-   for profile inspection, and pprof for export. Retain diagnostics and limits.
+5. Select output formats explicitly: JSON for discovery/metrics, table to rank
+   functions, DOT to trace callers and callees, and pprof for export. Retain
+   diagnostics and limits.
 6. Always produce Section 5's report, including after an exit. Fill unsupported
    fields with `unknown`, `not measured`, or `not applicable`, plus a reason.
    A missing measurement must never become evidence that the service is healthy.
@@ -188,19 +189,30 @@ request-normalized cost from raw profile totals.
 
 ## 4. Locate the changed application stack
 
-Run for the incident selector below and the qualified baseline selector/window.
-Omit the slice matcher when analyzing the whole service.
+Run both queries for the incident selector below and for the qualified baseline
+selector/window. Omit the slice matcher when analyzing the whole service.
 
 ```bash
+# Rank functions.
+gcx profiles query -d <pyro-uid> \
+  '{service_name="<suspect>",<label>="<value>"}' \
+  --profile-type <lens> --from <incident-from> --to <incident-to> -o table
+# Trace callers and callees of the ranked functions.
 gcx profiles query -d <pyro-uid> \
   '{service_name="<suspect>",<label>="<value>"}' \
   --profile-type <lens> --from <incident-from> --to <incident-to> -o dot
 ```
 
-Prefer explicit `-o dot` for caller/callee context, self/cumulative values and
-source locations when present. gcx falls back to table output with a warning
-when the backend explicitly rejects DOT as unsupported or returns a flame graph
-instead. Other errors still fail the query.
+Take function rankings and shares from the table. It aggregates each function
+and lists the top 20 by SELF, truncating names to 60 characters. Its PERCENTAGE
+column is SELF divided by the profile total, not the function TOTAL share.
+
+Use DOT for caller/callee context and source locations. Its nodes can be single
+source lines (`file.go:line`), so one function may appear as several nodes. A
+label reads `self (%) of cumulative (%)`, or a single value when they are
+equal. Do not rank functions or read self shares from DOT nodes. gcx falls back
+to table output with a warning when the backend explicitly rejects DOT as
+unsupported or returns a flame graph instead. Other errors still fail the query.
 Inspect the returned format and retain stderr. JSON encodes flame-graph wire
 data, not the human function table; agent output may instead reference a spill
 file that must be read.
@@ -208,12 +220,8 @@ file that must be read.
 DOT is pruned by default; dotted edges can skip intermediate frames. When
 caller context is missing, repeat the same query with `-o dot --max-nodes 250`
 in both windows. This raises the node limit; it does not guarantee an unpruned
-graph. If attribution remains ambiguous, use the pprof comparison below.
-
-The table shows the top 20 functions ranked by SELF and truncates names to 60
-characters. Its PERCENTAGE column is SELF divided by the profile total, not the
-function TOTAL share. Neither format can rule out a missing path. For ambiguous
-attribution or numerical differences, read
+graph. Neither format can rule out a missing path. For ambiguous attribution or
+numerical differences, read
 [pprof comparison](references/advanced-analysis.md#pprof-comparison) and export
 both profiles. Do not assume an exported profile repairs collection gaps.
 
