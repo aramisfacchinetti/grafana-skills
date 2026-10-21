@@ -204,13 +204,17 @@ gcx profiles query -d <pyro-uid> \
 ```
 
 Take function rankings and shares from the table. It aggregates each function
-and lists the top 20 by SELF, truncating names to 60 characters. Its PERCENTAGE
-column is SELF divided by the profile total, not the function TOTAL share.
+and lists the top 20 by SELF. Its PERCENTAGE column is SELF divided by the
+profile total, not the function TOTAL share. Names longer than 60 characters
+are cut and end in `...`; take the full name from the matching DOT node before
+reporting or interpreting it.
 
-Use DOT for caller/callee context and source locations. Its nodes can be single
-source lines (`file.go:line`), so one function may appear as several nodes. A
-label reads `self (%) of cumulative (%)`, or a single value when they are
-equal. Do not rank functions or read self shares from DOT nodes. gcx falls back
+Use DOT for caller/callee context, source locations, and full function names.
+Its nodes can be single source lines (`file.go:line`), so one function may
+appear as several nodes. A label splits the function name across lines,
+starting with the last element of its package path, then reads
+`self (%) of cumulative (%)`, or a single value when they are equal. Do not
+rank functions or read self shares from DOT nodes. gcx falls back
 to table output with a warning when the backend explicitly rejects DOT as
 unsupported or returns a flame graph instead. Other errors still fail the query.
 Inspect the returned format and retain stderr. JSON encodes flame-graph wire
