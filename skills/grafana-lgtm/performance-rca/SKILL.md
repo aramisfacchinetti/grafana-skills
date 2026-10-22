@@ -205,9 +205,11 @@ gcx profiles query -d <pyro-uid> \
 
 Take function rankings and shares from the table. It aggregates each function
 and lists the top 20 by SELF. Its PERCENTAGE column is SELF divided by the
-profile total, not the function TOTAL share. Names longer than 60 characters
-are cut and end in `...`; take the full name from the matching DOT node before
-reporting or interpreting it.
+profile total, not the function TOTAL share. The table omits everything past
+the top 20, so to total the share of a set of functions, such as all GC
+functions, sum SELF over the full profile from `-o json` or a pprof export.
+Names longer than 60 characters are cut and end in `...`; take the full name
+from the matching DOT node before reporting or interpreting it.
 
 Use DOT for caller/callee context, source locations, and full function names.
 Its nodes can be single source lines (`file.go:line`), so one function may
