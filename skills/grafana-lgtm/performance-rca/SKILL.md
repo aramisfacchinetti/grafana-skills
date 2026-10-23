@@ -62,8 +62,8 @@ The examples below need gcx v1.3.0 or later; check with `gcx --version`. If
 gcx is missing or older, ask the user to install or upgrade it from
 https://github.com/grafana/gcx before continuing. Do not guess command renames
 or silently drop time filters. Commands, flags, and output formats can still
-be unsupported by the backend; Sections 3 and 4 and the advanced reference
-describe those fallbacks.
+be unsupported by the backend; Section 4 and the advanced reference describe
+those fallbacks.
 
 ```bash
 # Discover only if the datasource UID is unknown; choose the target environment.
@@ -170,9 +170,8 @@ gcx profiles metrics -d <pyro-uid> '{service_name="<suspect>"}' \
 Use `profiles series` to discover actual label combinations for a service
 without requiring a profile type. See
 [scoped series discovery](references/advanced-analysis.md#scoped-series-discovery)
-for label projection and the fallback for backends that do not support
-discovery. Tenant-wide label inventories alone do not prove labels coexist on
-the suspect.
+for label projection. Tenant-wide label inventories alone do not prove labels
+coexist on the suspect.
 
 Repeat the chosen grouping for the baseline. Leaderboards are capped candidates,
 not a fleet census; missing groups may have fallen outside the limit. A single

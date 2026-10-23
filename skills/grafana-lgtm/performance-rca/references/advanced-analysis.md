@@ -6,7 +6,8 @@ owns comparison qualification and evidence limits; those apply here too.
 ## Scoped series discovery
 
 Use `profiles series` to discover label sets scoped to the suspect service and
-time window. Select the returned labels with `--label-name`.
+time window, rather than dumping every series in the tenant. Select the
+returned labels with `--label-name`.
 
 Substitute label names discovered by `profiles labels`; the placeholders do
 not assert that a pod or version label exists.
@@ -24,12 +25,6 @@ when checking coexistence. Repeat for the baseline to find label churn or the
 prior version; the endpoint discovers inventory, not resource cost or anomalies.
 Multiple `--match` selectors are a union, not an intersection. Put constraints
 in the same selector when they must all hold.
-
-If the backend does not support series discovery, use `profiles labels` for
-names/values, then scoped `profiles metrics --group-by <label>` as in the main
-skill. Only returned scoped groups establish that a label/value belongs to this
-workload. Missing combinations remain unknown. Avoid a full-tenant series dump
-just to find one service.
 
 ## Pprof comparison
 
